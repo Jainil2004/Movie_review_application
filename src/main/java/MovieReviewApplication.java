@@ -315,6 +315,7 @@ public class MovieReviewApplication {
         System.out.println("5. update Review");
         System.out.println("6. remove a Review");
         System.out.println("7. Current Reputations");
+        System.out.println("8. find reviews for a selected movie ");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine(); // Consume newline character
@@ -341,6 +342,9 @@ public class MovieReviewApplication {
                 break;
             case 7:
                 listMoviesWithAverageRatings();
+                break;
+            case 8:
+                findReviewsForSelectedMovie();
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -612,7 +616,7 @@ public class MovieReviewApplication {
 
     private static void listMoviesWithAverageRatings() {
         // Aggregate pipeline to calculate the average rating for each movie
-        List<Document> pipeline = Arrays.asList(
+        List<Document> pipeline = List.of(
                 new Document("$group", new Document("_id", "$movieId")
                         .append("averageRating", new Document("$avg", "$rating"))
                 )
@@ -621,7 +625,7 @@ public class MovieReviewApplication {
         // Execute the aggregation query
         AggregateIterable<Document> result = database.getCollection("Reviews").aggregate(pipeline);
 
-        // Check if there are any resultss
+        // Check if there are any results
         if (result.iterator().hasNext()) {
             for (Document movieData : result) {
                 String movieId = movieData.getString("_id");
@@ -641,6 +645,47 @@ public class MovieReviewApplication {
             System.out.println("No reviews found.");
         }
     }
+
+    private static void findReviewsForSelectedMovie() {
+        // Display the list of all movies
+        System.out.println("Select a movie to see reviews:");
+        for (Movie movie : movies) {
+            System.out.println(movie.getMovieId() + ". " + movie.getTitle());
+        }
+
+        // Ask the user to select a movie
+        System.out.print("Enter the number of the movie: ");
+        int movieIndex = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+
+        if (movieIndex < 1 || movieIndex > movies.size()) {
+            System.out.println("Invalid movie selection.");
+            return;
+        }
+
+        // Get the selected movie
+        String movieId = movies.get(movieIndex - 1).getMovieId();
+
+        // MongoDB query to find reviews for the selected movie
+        Document query = new Document("movieId", movieId);
+
+        // Execute the query
+        FindIterable<Document> result = database.getCollection("Reviews").find(query);
+
+        // Print the reviews for the selected movie
+        if (result != null) {
+            System.out.println("Reviews for Movie with ID: " + movieId);
+            for (Document document : result) {
+                System.out.println("User ID: " + document.getString("userId"));
+                System.out.println("Rating: " + document.getInteger("rating"));
+                System.out.println("Comments: " + document.getString("comments"));
+                System.out.println();
+            }
+        } else {
+            System.out.println("No reviews found for Movie with ID: " + movieId);
+        }
+    }
+
 
     // Method to add some test data (for testing purposes) {until we get the stupid database up}
     private static void addTestData() {
