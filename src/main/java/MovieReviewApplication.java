@@ -312,6 +312,7 @@ public class MovieReviewApplication {
         System.out.println("3. List Movies with Reviews");
         System.out.println("4. Logout");
         System.out.println("5. update Review");
+        System.out.println("6. remove a Review");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine(); // Consume newline character
@@ -332,6 +333,9 @@ public class MovieReviewApplication {
                 break;
             case 5:
                 updateReview();
+                break;
+            case 6:
+                removeReview();
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -476,6 +480,60 @@ public class MovieReviewApplication {
         );
 
         System.out.println("Review updated successfully!");
+    }
+
+    private static void removeReview() {
+        if (currentUser == null) {
+            System.out.println("You must be logged in to remove a review.");
+            return;
+        }
+
+        // Get reviews associated with the logged-in user
+        List<Review> userReviews = getUserReviews(currentUser.getUserId());
+
+        if (userReviews.isEmpty()) {
+            System.out.println("You have no reviews to remove.");
+            return;
+        }
+
+        // Display the user's reviews
+        System.out.println("Your Reviews:");
+        for (int i = 0; i < userReviews.size(); i++) {
+            System.out.println((i + 1) + ". Movie: " + userReviews.get(i).getMovieId() +
+                    ", Rating: " + userReviews.get(i).getRating() +
+                    ", Comments: " + userReviews.get(i).getComments());
+        }
+
+        // Ask the user to select the review to delete
+        System.out.print("Enter the number of the review you want to delete: ");
+        int reviewIndex = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+
+        if (reviewIndex < 1 || reviewIndex > userReviews.size()) {
+            System.out.println("Invalid review selection.");
+            return;
+        }
+
+        // Get the selected review
+        Review selectedReview = userReviews.get(reviewIndex - 1);
+
+//        // for testing
+        String validation_check = selectedReview.toString();
+        System.out.println(validation_check);
+
+        // Remove the selected review from the in-memory list
+        reviews.remove(selectedReview);
+
+        // Remove the selected review from the database
+        MongoCollection<Document> reviewsCollection = database.getCollection("Reviews");
+        reviewsCollection.deleteOne(
+                Filters.and(
+                        Filters.eq("userId", selectedReview.getUserId()),
+                        Filters.eq("movieId", selectedReview.getMovieId())
+                )
+        );
+
+        System.out.println("Review removed successfully.");
     }
 
     private static List<Review> getUserReviews(String userId) {
