@@ -316,6 +316,7 @@ public class MovieReviewApplication {
         System.out.println("6. remove a Review");
         System.out.println("7. Current Reputations");
         System.out.println("8. find reviews for a selected movie ");
+        System.out.println("9. find movie by genre");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine(); // Consume newline character
@@ -345,6 +346,9 @@ public class MovieReviewApplication {
                 break;
             case 8:
                 findReviewsForSelectedMovie();
+                break;
+            case 9:
+                searchMoviesByGenre();
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -683,6 +687,28 @@ public class MovieReviewApplication {
             }
         } else {
             System.out.println("No reviews found for Movie with ID: " + movieId);
+        }
+    }
+
+    private static void searchMoviesByGenre() {
+        System.out.print("Enter the genre to search for: ");
+        String genre = scanner.nextLine();
+
+        List<Movie> matchingMovies = new ArrayList<>();
+        for (Movie movie : movies) {
+            if (movie.getGenre().equalsIgnoreCase(genre)) {
+                matchingMovies.add(movie);
+            }
+        }
+
+        if (matchingMovies.isEmpty()) {
+            System.out.println("No movies found for the genre: " + genre);
+        } else {
+            System.out.println("Movies matching the genre '" + genre + "':");
+            for (Movie movie : matchingMovies) {
+                System.out.println(movie.getTitle() + " - " + movie.getDescription());
+                // Display other movie details as needed
+            }
         }
     }
 
