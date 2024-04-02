@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -313,6 +314,7 @@ public class MovieReviewApplication {
         System.out.println("4. Logout");
         System.out.println("5. update Review");
         System.out.println("6. remove a Review");
+        System.out.println("7. Current Reputations");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine(); // Consume newline character
@@ -336,6 +338,9 @@ public class MovieReviewApplication {
                 break;
             case 6:
                 removeReview();
+                break;
+            case 7:
+                listMoviesWithAverageRatings();
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -602,6 +607,38 @@ public class MovieReviewApplication {
             System.out.println("Rating: " + review.getRating());
             System.out.println("Comments: " + review.getComments());
             System.out.println();
+        }
+    }
+
+    private static void listMoviesWithAverageRatings() {
+        // Aggregate pipeline to calculate the average rating for each movie
+        List<Document> pipeline = Arrays.asList(
+                new Document("$group", new Document("_id", "$movieId")
+                        .append("averageRating", new Document("$avg", "$rating"))
+                )
+        );
+
+        // Execute the aggregation query
+        AggregateIterable<Document> result = database.getCollection("Reviews").aggregate(pipeline);
+
+        // Check if there are any resultss
+        if (result.iterator().hasNext()) {
+            for (Document movieData : result) {
+                String movieId = movieData.getString("_id");
+                double averageRating = movieData.getDouble("averageRating");
+
+                // Find the movie details using the movieId
+                Movie movieDetails = findMovieById(movieId);
+                if (movieDetails != null) {
+                    System.out.println("Movie: " + movieDetails.getTitle());
+                    System.out.println("Average rating: " + averageRating);
+                } else {
+                    System.out.println("Error: Movie details not found for movie ID: " + movieId);
+                }
+                System.out.println();
+            }
+        } else {
+            System.out.println("No reviews found.");
         }
     }
 
