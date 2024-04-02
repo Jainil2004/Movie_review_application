@@ -311,6 +311,7 @@ public class MovieReviewApplication {
         System.out.println("2. Post a Review");
         System.out.println("3. List Movies with Reviews");
         System.out.println("4. Logout");
+        System.out.println("5. update Review");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine(); // Consume newline character
@@ -328,6 +329,9 @@ public class MovieReviewApplication {
             case 4:
                 currentUser = null;
                 registerOrLogin();
+                break;
+            case 5:
+                updateReview();
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -411,6 +415,72 @@ public class MovieReviewApplication {
         reviews.add(review);
 
         System.out.println("Review posted successfully!");
+    }
+
+    private static void updateReview() {
+        if (currentUser == null) {
+            System.out.println("You must be logged in to update a review.");
+            return;
+        }
+
+        System.out.println("Updating Review");
+
+        // Retrieve reviews posted by the current user
+        List<Review> userReviews = new ArrayList<>();
+        for (Review review : reviews) {
+            if (review.getUserId().equals(currentUser.getUserId())) {
+                userReviews.add(review);
+            }
+        }
+
+        if (userReviews.isEmpty()) {
+            System.out.println("You haven't posted any reviews yet.");
+            return;
+        }
+
+        // Display reviews for selection
+        System.out.println("Your Reviews:");
+        for (int i = 0; i < userReviews.size(); i++) {
+            System.out.println((i + 1) + ". " + userReviews.get(i).getMovieId() + " - Rating: " + userReviews.get(i).getRating());
+        }
+
+        // Prompt user to select a review for update
+        System.out.print("Select a review to update (enter number): ");
+        int reviewIndex = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+
+        if (reviewIndex < 1 || reviewIndex > userReviews.size()) {
+            System.out.println("Invalid review selection.");
+            return;
+        }
+
+        // Get the selected review
+        Review selectedReview = userReviews.get(reviewIndex - 1);
+
+        // Prompt user for new rating and comments
+        System.out.print("Enter new rating (1-5): ");
+        int newRating = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+        System.out.print("Enter new comments: ");
+        String newComments = scanner.nextLine();
+
+        // Update the selected review
+        selectedReview.setRating(newRating);
+        selectedReview.setComments(newComments);
+
+        // Update the corresponding document in the database
+        MongoCollection<Document> reviewsCollection = database.getCollection("Reviews");
+        Document updatedReviewDoc = new Document("rating", newRating)
+                .append("comments", newComments);
+        reviewsCollection.updateOne(
+                Filters.and(
+                        Filters.eq("userId", selectedReview.getUserId()),
+                        Filters.eq("movieId", selectedReview.getMovieId())
+                ),
+                new Document("$set", updatedReviewDoc)
+        );
+
+        System.out.println("Review updated successfully!");
     }
 
     private static void listMoviesWithReviews() {
