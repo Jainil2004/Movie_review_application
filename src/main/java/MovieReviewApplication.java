@@ -426,12 +426,7 @@ public class MovieReviewApplication {
         System.out.println("Updating Review");
 
         // Retrieve reviews posted by the current user
-        List<Review> userReviews = new ArrayList<>();
-        for (Review review : reviews) {
-            if (review.getUserId().equals(currentUser.getUserId())) {
-                userReviews.add(review);
-            }
-        }
+        List<Review> userReviews = getUserReviews(currentUser.getUserId());
 
         if (userReviews.isEmpty()) {
             System.out.println("You haven't posted any reviews yet.");
@@ -481,6 +476,16 @@ public class MovieReviewApplication {
         );
 
         System.out.println("Review updated successfully!");
+    }
+
+    private static List<Review> getUserReviews(String userId) {
+        List<Review> userReviews = new ArrayList<>();
+        for (Review review : reviews) {
+            if (review.getUserId().equals(userId)) {
+                userReviews.add(review);
+            }
+        }
+        return userReviews;
     }
 
     private static void listMoviesWithReviews() {
@@ -542,7 +547,7 @@ public class MovieReviewApplication {
         }
     }
 
-    // Method to add some test data (for testing purposes)
+    // Method to add some test data (for testing purposes) {until we get the stupid database up}
     private static void addTestData() {
         movies.add(new Movie("1", "The Shawshank Redemption", "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.", "1994", "Drama"));
         movies.add(new Movie("2", "The Godfather", "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.", "1972", "Crime"));
