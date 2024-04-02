@@ -1,6 +1,4 @@
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -20,6 +18,7 @@ public class MovieReviewApplication {
 
     public static void main(String[] args) {
         initializeDatabase();
+        System.out.println("App version: v1.9");
         System.out.println("Loading Mongo Dependency");
         System.out.println("Initializing connection to Mongo v4.4.0");
         System.out.println("Syncing data with MongoDB");
@@ -81,7 +80,6 @@ public class MovieReviewApplication {
         }));
     }
 
-
     private static boolean documentExists(MongoCollection<Document> collection, String fieldName, String value) {
         Document query = new Document(fieldName, value);
         return collection.countDocuments(query) > 0;
@@ -104,7 +102,7 @@ public class MovieReviewApplication {
         try (MongoCursor<Document> cursor = usersCollection.find().iterator()) {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
-                String userId = doc.getString("userId"); // Parse userId as string
+                String userId = doc.getString("userId");
                 User user = new User(userId, doc.getString("username"), doc.getString("password"),
                         doc.getString("email"));
                 users.add(user);
@@ -117,9 +115,9 @@ public class MovieReviewApplication {
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
                 // Fetch user and movie references
-                String userId = doc.getString("userId"); // Parse userId as string
+                String userId = doc.getString("userId");
                 User user = findUserById(userId);
-                String movieId = doc.getString("movieId"); // Parse movieId as string
+                String movieId = doc.getString("movieId");
                 Movie movie = findMovieById(movieId);
                 String reviewId = doc.getString("reviewId");
                 if (user != null && movie != null) {
@@ -275,8 +273,6 @@ public class MovieReviewApplication {
         System.out.println("Registration successful. You can now log in.");
     }
 
-
-
     private static boolean isUsernameTaken(String username) {
         for (User user : users) {
             if (user.getUsername().equals(username)) {
@@ -373,16 +369,16 @@ public class MovieReviewApplication {
         System.out.print("Enter Genre: ");
         String genre = scanner.nextLine();
 
-        int maxUserId = 0;
+        int maxMovieId = 0;
         for (Movie movie : movies) {
-            int userIdInt = Integer.parseInt(movie.getMovieId());
-            if (userIdInt > maxUserId) {
-                maxUserId = userIdInt;
+            int MovieIdInt = Integer.parseInt(movie.getMovieId());
+            if (MovieIdInt > maxMovieId) {
+                maxMovieId = MovieIdInt;
             }
         }
 
-        // Assign new user ID by incrementing the maximum user ID found
-        int newMovieId = maxUserId + 1;
+        // Assign new Mvoie ID by incrementing the maximum user ID found
+        int newMovieId = maxMovieId + 1;
 
         Movie movie = new Movie(Integer.toString(newMovieId) , title, description, releaseDate, genre);
         movies.add(movie);
@@ -423,15 +419,15 @@ public class MovieReviewApplication {
         System.out.print("Enter Comments (optional): ");
         String comments = scanner.nextLine();
 
-        int maxUserId = 0;
+        int maxReviewId = 0;
         for (Review review : reviews) {
-            int userIdInt = Integer.parseInt(review.getReviewId());
-            if (userIdInt > maxUserId) {
-                maxUserId = userIdInt;
+            int ReviewIdInt = Integer.parseInt(review.getReviewId());
+            if (ReviewIdInt > maxReviewId) {
+                maxReviewId = ReviewIdInt;
             }
         }
 
-        int newReviewId = maxUserId + 1;
+        int newReviewId = maxReviewId + 1;
 
         Review review = new Review(Integer.toString(newReviewId),currentUser.getUserId(), selectedMovie.getMovieId(), rating, comments);
         reviews.add(review);
@@ -496,7 +492,6 @@ public class MovieReviewApplication {
                 ),
                 new Document("$set", updatedReviewDoc)
         );
-
         System.out.println("Review updated successfully!");
     }
 
@@ -550,7 +545,6 @@ public class MovieReviewApplication {
                         Filters.eq("movieId", selectedReview.getMovieId())
                 )
         );
-
         System.out.println("Review removed successfully.");
     }
 
@@ -741,7 +735,6 @@ public class MovieReviewApplication {
             }
         }
     }
-
 
     // Method to add some test data (for testing purposes) {until we get the stupid database up}
     private static void addTestData() {
