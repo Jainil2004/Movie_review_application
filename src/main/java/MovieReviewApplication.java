@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -317,6 +318,7 @@ public class MovieReviewApplication {
         System.out.println("7. Current Reputations");
         System.out.println("8. find reviews for a selected movie ");
         System.out.println("9. find movie by genre");
+        System.out.println("10. find movie by year");
         System.out.print("Enter your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine(); // Consume newline character
@@ -349,6 +351,9 @@ public class MovieReviewApplication {
                 break;
             case 9:
                 searchMoviesByGenre();
+                break;
+            case 10:
+                searchMoviesByReleaseYear();
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -705,6 +710,31 @@ public class MovieReviewApplication {
             System.out.println("No movies found for the genre: " + genre);
         } else {
             System.out.println("Movies matching the genre '" + genre + "':");
+            for (Movie movie : matchingMovies) {
+                System.out.println(movie.getTitle() + " - " + movie.getDescription());
+                // Display other movie details as needed
+            }
+        }
+    }
+
+    private static void searchMoviesByReleaseYear() {
+        System.out.print("Enter the release year: ");
+        int year = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+
+        List<Movie> matchingMovies = new ArrayList<>();
+        for (Movie movie : movies) {
+            String releaseYearStr = movie.getReleaseDate().substring(0, 4); // Extract first four characters (year) from release date string
+            int releaseYear = Integer.parseInt(releaseYearStr);
+            if (releaseYear == year) {
+                matchingMovies.add(movie);
+            }
+        }
+
+        if (matchingMovies.isEmpty()) {
+            System.out.println("No movies found for the specified year.");
+        } else {
+            System.out.println("Movies released in " + year + ":");
             for (Movie movie : matchingMovies) {
                 System.out.println(movie.getTitle() + " - " + movie.getDescription());
                 // Display other movie details as needed
